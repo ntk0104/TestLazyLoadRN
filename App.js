@@ -1,114 +1,49 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
+import React, { Component } from 'react'
+import { Text, View, TextInput, TouchableOpacity } from 'react-native'
+// import ToDoList from './components/FlatListToDo/index'
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+export default class App extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      listTodo: [],
+      todoTxt: null,
+      ToDoListComponent: null
+    }
+  }
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  lazyLoadToDoList = async () => {
+    const {default: ToDo} = await import('./components/FlatListToDo')
+    this.setState({ ToDoListComponent: ToDo })
+  }
 
-const App: () => React$Node = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
-  );
-};
+  componentDidUpdate(prevProps, prevState) {
+    if(!this.state.ToDoListComponent && this.state.listTodo.length > 0){
 
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
+      console.log('%c%s', 'color: #00e600', "Begin ll");
+      this.lazyLoadToDoList()
+    }
+  }
 
-export default App;
+  render() {
+    console.log('%c⧭', 'color: #e209d0', "Rendering App")
+    const {ToDoListComponent} = this.state
+    const LLToDoList = ToDoListComponent ? <ToDoListComponent data={this.state.listTodo} /> : null
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text> Input TODO </Text>
+        <View style={{ flexDirection: 'row' }}>
+          <TextInput
+            style={{ height: 40, width: 100, borderColor: 'gray', borderWidth: 1 }}
+            onChangeText={text => this.setState({ todoTxt: text })}
+          />
+          <TouchableOpacity style={{ padding: 10, backgroundColor: 'blue' }} onPress={() => this.setState({ listTodo: [...this.state.listTodo, this.state.todoTxt] })}>
+            <Text>Submit</Text>
+          </TouchableOpacity>
+        </View>
+        {/* <ToDoList data={this.state.listTodo} /> */}
+        {LLToDoList}
+      </View>
+    )
+  }
+}
